@@ -11,8 +11,9 @@ public:
     void MeteorMovement();
     void draw(RenderWindow& main_win);
     bool collision(FloatRect object);
+    bool isBombed = false;
     void restart();
-    FloatRect getMeteorXY();
+    Vector2f getMeteorXY();
 
 private:
     Sprite space_obj;

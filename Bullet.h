@@ -15,6 +15,7 @@ public:
     void defaultpos();
     void draw(RenderWindow& main_win);
     bool getOfBounds();
+    FloatRect getBulletXY();
     Vector2f bulletBounds();
     bool ishoot = false, controlflag = true;
 };

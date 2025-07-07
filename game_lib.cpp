@@ -1,9 +1,9 @@
 #include "game_lib.h"
 
 // движение космического корабля
-void SpaceshipMovement(Sprite& spaceship_shape, Vector2f&  spaceship_pos)
+void SpaceshipMovement(Sprite& spaceship_shape, Vector2f&  spaceship_pos, float time)
 {
-    spaceship_shape.move(spaceship_pos);
+    spaceship_shape.move({spaceship_pos.x*time,spaceship_pos.y*time});
     if (spaceship_shape.getPosition().x < 0) spaceship_shape.setPosition(Vector2f(0,spaceship_shape.getPosition().y));
     if (spaceship_shape.getPosition().x > 656) spaceship_shape.setPosition(Vector2f(656,spaceship_shape.getPosition().y));
     if (spaceship_shape.getPosition().y < 0) spaceship_shape.setPosition(Vector2f(spaceship_shape.getPosition().x,0));

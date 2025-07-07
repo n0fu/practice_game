@@ -39,7 +39,7 @@ void Meteor::restart()
 
 }
 
-FloatRect Meteor::getMeteorXY()
+Vector2f Meteor::getMeteorXY()
 {
-    return space_obj.getGlobalBounds();
+    return space_obj.getPosition();
 }

@@ -36,3 +36,8 @@ bool Bullet::getOfBounds()
     return false;
     
 }
+
+FloatRect Bullet::getBulletXY()
+{
+    return bullet_shape.getGlobalBounds();
+}
