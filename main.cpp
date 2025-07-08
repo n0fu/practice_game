@@ -5,6 +5,7 @@
 int main(){
     srand(time(NULL));
     bool gameover = false;
+    bool winner = false;
     bool bullet_out = false;
     Vector2f spaceship_crash_pos;
 // создаем окно
@@ -17,7 +18,7 @@ int main(){
 
 // задний фон
     Texture background;
-    if (!background.loadFromFile("images/zxc.png")) return 1;
+    if (!background.loadFromFile("images/background.png")) return 1;
     RectangleShape background_shape(Vector2f(720,720));
     background_shape.setTexture(&background);
     background_shape.setPosition(Vector2f(0,0));
@@ -29,32 +30,48 @@ int main(){
     Clock clock;
     float background_time;
     float spaceship_time;
-
+    int countowin = 0;
 // создаем космический шаттл
     Vector2f spaceship_pos = {0, 0};
     Texture spaceship;
     spaceship.loadFromFile("images/spaceship.png");
     Sprite spaceship_shape(spaceship);
-    spaceship_shape.setTextureRect(IntRect({0,0},{64,64}));
+    // spaceship_shape.setTextureRect(IntRect({0,0},{64,64}));
     spaceship_shape.setPosition(Vector2f(360,600));
 
 // создаем спрайт взрыва космического корабля
     Texture explode;
     explode.loadFromFile("images/explode.png");
     Sprite explode_shape(explode);
-    explode_shape.setTextureRect(IntRect({0,0},{64,64}));
+    // explode_shape.setTextureRect(IntRect({0,0},{64,64}));
 
 // создаем метеориты
     Meteor* meteors[10] = {nullptr};
     int nmeteors = 10;
+    int enemyleft = 10;
     for (int m = 0; m < nmeteors; m++) meteors[m] = new Meteor();
 
 // создаем пульки для корабля
     Bullet* bullet[15] = {nullptr};
     int bullets = 15;
+    int ammoleft = 15;
     for (int b = 0; b < bullets; b++) bullet[b] = new Bullet();
     int count_bullets = 0;
-    
+
+// создаем текст для победы/проигрыша в игре
+    Font font;
+    font.openFromFile("font/static/BitcountGridDouble-Regular.ttf");
+    Text win(font);
+    win.setString("You win!");
+    win.setCharacterSize(32);
+    win.setFillColor(Color::Blue);
+    win.setPosition({300,320});
+    Text lose(font);
+    lose.setString("You lose!");
+    lose.setCharacterSize(32);
+    lose.setFillColor(Color::Red);
+    lose.setPosition({300,320});
+
 // основной код игры
     while (main_win.isOpen()){
         background_time = clock.getElapsedTime().asMicroseconds();
@@ -62,6 +79,19 @@ int main(){
         spaceship_time = spaceship_time / 2000;
         background_time = background_time / 6000;
         clock.restart();
+
+        // создаем элементы интерфейса
+        std::ostringstream ammo;
+        ammo << "Ammo: " << ammoleft;
+        Text ammoInterface(font);
+        ammoInterface.setString(ammo.str());
+        ammoInterface.setPosition({500,24});
+
+        std::ostringstream enemy;
+        enemy << "Enemy: " << enemyleft;
+        Text enemyInterface(font);
+        enemyInterface.setString(enemy.str());
+        enemyInterface.setPosition({20,24});
 
          while (const std::optional event = main_win.pollEvent()){
             if (event->is<sf::Event::Closed>())
@@ -77,9 +107,10 @@ int main(){
                     if (keyPressed->scancode == sf::Keyboard::Scancode::S)
                         spaceship_pos.y = 0.5;
                 }
-                if (keyPressed->scancode == sf::Keyboard::Scancode::Space && count_bullets < bullets && !gameover){ // выстрел на пробел
+                if (keyPressed->scancode == sf::Keyboard::Scancode::Space && count_bullets < bullets && !gameover && !winner){ // выстрел на пробел
                     bullet[count_bullets]->restart_bullet(spaceship_shape);
                     bullet[count_bullets]->ishoot = true;
+                    ammoleft--;
                     count_bullets += 1;
                 }
             } else  if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>()) {
@@ -112,8 +143,21 @@ int main(){
             spaceship_pos = {0,0};
             explode_shape.setPosition(spaceship_crash_pos);
             main_win.draw(explode_shape);
+            main_win.draw(lose);
+        } else if (countowin == 10){
+            for (int i = 0; i < bullets; i++){
+                if (bullet[i]){
+                    delete bullet[i];
+                    bullet[i] = nullptr;
+                }
+            }
+            winner = true;
+            spaceship_shape.setPosition({-10,-10});
+            main_win.draw(win);
         } else {
             main_win.draw(spaceship_shape);
+            main_win.draw(ammoInterface);
+            main_win.draw(enemyInterface);
             for (int i = 0; i < nmeteors;i++){
                 if (meteors[i]){
                     if (meteors[i]->collision(spaceship_shape.getGlobalBounds())){
@@ -134,6 +178,8 @@ int main(){
                         if (bullet[i]){
                             if (meteors[m]){
                                 if (meteors[m]->collision(bullet[i]->getBulletXY())){
+                                    countowin++;
+                                    enemyleft--;
                                     delete meteors[m];
                                     meteors[m] = nullptr;
                                     delete bullet[i];
@@ -146,38 +192,6 @@ int main(){
             }
                 
         }
-        // for (int i = 0; i < nmeteors; i++){
-        //     meteors[i]->MeteorMovement();
-        // } 
-        // for (int i = 0; i < nmeteors; i++) {
-        //     if (meteors[i]->collision(spaceship_shape.getGlobalBounds())){   // блок обработки столкновения корабля и метеорита
-        //         gameover = true; 
-        //         explode_shape.setPosition(spaceship_shape.getPosition());
-        //     }
-        // }
-        // main_win.clear();
-        // main_win.draw(background_shape);
-        // main_win.draw(background_shape2);
-        // if (gameover)
-        // {
-        //     spaceship_pos = {0,0};
-        //     main_win.draw(explode_shape);
-        // } else {main_win.draw(spaceship_shape);}
-        // for (int i = 0; i < nmeteors && meteors[i]; i++){
-        //     meteors[i]->draw(main_win);
-        // }
-        // for (int i = 0; i < bullets; i++)
-        // {
-        //     if (bullet[i] && bullet[i]->ishoot)
-        //     {
-        //         bullet[i]->bulletMovement();
-        //         bullet[i]->draw(main_win);
-        //         if (bullet[i]->getOfBounds()){
-        //             delete bullet[i];
-        //             bullet[i] = nullptr;
-        //         }
-        //     }
-        // }
         main_win.display();
     
     }

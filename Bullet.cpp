@@ -12,7 +12,7 @@ Bullet::~Bullet()
 
 void Bullet::restart_bullet(Sprite &spaceship_shape)
 {
-    bullet_shape.setPosition({spaceship_shape.getPosition().x+31,spaceship_shape.getPosition().y});
+    bullet_shape.setPosition({spaceship_shape.getPosition().x+40,spaceship_shape.getPosition().y+23});
 }
 
 void Bullet::bulletMovement()
