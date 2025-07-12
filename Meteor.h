@@ -8,7 +8,7 @@ public:
     Meteor();
     ~Meteor();
 
-    void MeteorMovement();
+    void MeteorMovement(float time);
     void draw(RenderWindow& main_win);
     bool collision(FloatRect object);
     bool isBombed = false;

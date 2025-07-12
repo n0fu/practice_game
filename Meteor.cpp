@@ -13,9 +13,9 @@ Meteor::~Meteor()
 
 }
 
-void Meteor::MeteorMovement()
+void Meteor::MeteorMovement(float time)
 {
-    space_obj.move(Vector2f(0, static_cast<float>(0.03)));
+    space_obj.move(Vector2f(0, static_cast<float>(0.3)*time));
     if (space_obj.getPosition().y > 720) restart();
 }
 

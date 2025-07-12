@@ -15,9 +15,9 @@ void Bullet::restart_bullet(Sprite &spaceship_shape)
     bullet_shape.setPosition({spaceship_shape.getPosition().x+40,spaceship_shape.getPosition().y+23});
 }
 
-void Bullet::bulletMovement()
+void Bullet::bulletMovement(float time)
 {
-    bullet_shape.move({0,-0.04});
+    bullet_shape.move({0,-0.5*time});
 }
 
 void Bullet::draw(RenderWindow &main_win)
