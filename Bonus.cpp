@@ -37,8 +37,3 @@ bool Bonus::collision(FloatRect object)
     if (bonusSprite.getGlobalBounds().findIntersection(object)) return true;
     return false;
 }
-
-// FloatRect Bonus::getBonusXY()
-// {
-//     return bonusSprite.getGlobalBounds();
-// }

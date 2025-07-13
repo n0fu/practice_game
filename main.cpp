@@ -3,125 +3,130 @@
 #include "Bullet.h"
 #include "Bonus.h"
 
+
 int main(){
     srand(time(NULL));
     bool gameover = false;
-    bool winner = false;
-    bool bullet_out = false;
+    bool winner = false; 
     bool game = false;
+    int meteors = 10;
+    int enemyleft = 10;
+    int bullets = 15;
+    int ammoleft = 15;
+    int count_bullets = 0;
     Vector2f spaceship_crash_pos;
+
 // создаем окно
-    RenderWindow main_win(VideoMode({720,720}), "Space defender", Style::Close);
-    Image winicon;
-    if (!winicon.loadFromFile("images/icon.png")) return 1;
-    main_win.setIcon(Vector2u(32,32),winicon.getPixelsPtr());
+    RenderWindow MainWindow(VideoMode({720,720}), "Space defender", Style::Close);
+    MainWindow.setMouseCursorVisible(false);
+    Image WindowIcon;
+    if (!WindowIcon.loadFromFile("images/icon.png")) return 1;
+    MainWindow.setIcon(Vector2u(32,32),WindowIcon.getPixelsPtr());
 
 // задний фон
-    Texture background;
-    if (!background.loadFromFile("images/background.png")) return 1;
-    RectangleShape background_shape(Vector2f(720,720));
-    background_shape.setTexture(&background);
-    background_shape.setPosition(Vector2f(0,0));
-    
-    RectangleShape background_shape2(Vector2f(720,720));
-    background_shape2.setTexture(&background);
-    background_shape2.setPosition(Vector2f(0,-720));
+    Texture BackgroundTexture;
+    if (!BackgroundTexture.loadFromFile("images/background.png")) return 1;
+    RectangleShape Background1(Vector2f(720,720));
+    RectangleShape Background2(Vector2f(720,720));
+    Background1.setTexture(&BackgroundTexture);
+    Background2.setTexture(&BackgroundTexture);
+    Background1.setPosition(Vector2f(0,0));
+    Background2.setPosition(Vector2f(0,-720));
 
     Vector2f pos1,pos2;
     Clock clock;
-    float background_time;
-    float spaceship_time;
-    float bullet_time;
-    float meteor_time;
-    float bonus_time;
+    struct timers
+    {
+        float background;
+        float spaceship;
+        float bullet;
+        float meteor;
+        float bonus;
+    }timer;
+    
     int countowin = 0;
 // создаем космический шаттл
-    Vector2f spaceship_pos = {0, 0};
-    Texture spaceship;
-    spaceship.loadFromFile("images/spaceship.png");
-    Sprite spaceship_shape(spaceship);
-    // spaceship_shape.setTextureRect(IntRect({0,0},{64,64}));
-    spaceship_shape.setPosition(Vector2f(360,600));
+    Vector2f spaceship_pos = {0,0};
+    Texture SpaceshipTexture;
+    SpaceshipTexture.loadFromFile("images/spaceship.png");
+    Sprite Spaceship(SpaceshipTexture);
+    Spaceship.setPosition(Vector2f(360,600));
 
 // создаем спрайт взрыва космического корабля
-    Texture explode;
-    explode.loadFromFile("images/explode.png");
-    Sprite explode_shape(explode);
-    // explode_shape.setTextureRect(IntRect({0,0},{64,64}));
+    Texture ExplodeTexture;
+    ExplodeTexture.loadFromFile("images/explode.png");
+    Sprite Explode(ExplodeTexture);
 
-// создаем метеориты
-    Meteor* meteors[10] = {nullptr};
-    int nmeteors = 10;
-    int enemyleft = 10;
-    for (int m = 0; m < nmeteors; m++) meteors[m] = new Meteor();
-
-// создаем пульки для корабля
-    Bullet* bullet[75] = {nullptr};
-    int bullets = 15;
-    int ammoleft = 15;
-    for (int b = 0; b < 75; b++) bullet[b] = new Bullet();
-    int count_bullets = 0;
-
-    Bonus* bonus = {nullptr};
-    bonus = new Bonus();
+// создаем метеориты, снаряды и бонусы
+    Meteor* Meteors[10] = {nullptr};
+    Bullet* Bullets[75] = {nullptr};
+    Bonus* Bonuses[2] = {nullptr};
+    for (int m = 0; m < meteors; m++) Meteors[m] = new Meteor();
+    for (int b = 0; b < 75; b++) Bullets[b] = new Bullet();
+    for (int b = 0; b < 2; b++) Bonuses[b] = new Bonus();
 
 // создаем текст для победы/проигрыша в игре
     Font font;
     font.openFromFile("font/static/BitcountGridDouble-Regular.ttf");
-    Text win(font);
-    win.setString("You win!");
-    win.setCharacterSize(32);
-    win.setFillColor(Color::Blue);
-    win.setPosition({300,320});
-    Text lose(font);
-    lose.setString("You lose!");
-    lose.setCharacterSize(32);
-    lose.setFillColor(Color::Red);
-    lose.setPosition({300,320});
+    Text Win(font);
+    Text Lose(font);
+    Win.setString("You win!");
+    Lose.setString("You lose!");
+    float winpos = (720 - Win.getGlobalBounds().size.length()) / 2;
+    float losepos = (720 - Lose.getGlobalBounds().size.length()) / 2;
+    Win.setCharacterSize(32);
+    Lose.setCharacterSize(32);
+    Win.setFillColor(Color::Blue);
+    Lose.setFillColor(Color::Red);
+    Win.setPosition({winpos,320});
+    Lose.setPosition({losepos,320});
 
 // создаем текст для того, чтобы перезапустить/начать игру
-
-    Text restartGame(font);
-    restartGame.setString("Press F to restart game");
-    restartGame.setCharacterSize(32);
-    restartGame.setFillColor(Color::White);
-    restartGame.setPosition({200,370});
-    Text startGame(font);
-    startGame.setString("Press space to start game");
-    startGame.setCharacterSize(32);
-    startGame.setFillColor(Color::White);
-    startGame.setPosition({200,320});
+    Text RestartGame(font);
+    Text StartGame(font);
+    RestartGame.setString("Press F to restart game");
+    StartGame.setString("Press space to start game");
+    float restartpos = (720 - RestartGame.getGlobalBounds().size.length()) / 2;
+    float startpos = (720 - StartGame.getGlobalBounds().size.length()) / 2;
+    RestartGame.getGlobalBounds().size.length();
+    StartGame.getGlobalBounds().size.length();
+    RestartGame.setCharacterSize(32);
+    StartGame.setCharacterSize(32);
+    RestartGame.setFillColor(Color::White);
+    StartGame.setFillColor(Color::White);
+    RestartGame.setPosition({restartpos,370});
+    StartGame.setPosition({startpos,320});
 
 // основной код игры
-    while (main_win.isOpen()){
-        background_time = clock.getElapsedTime().asMicroseconds();
-        spaceship_time = clock.getElapsedTime().asMicroseconds();
-        bullet_time = clock.getElapsedTime().asMicroseconds();
-        meteor_time = clock.getElapsedTime().asMicroseconds();
-        bonus_time = clock.getElapsedTime().asMicroseconds();
-        spaceship_time = spaceship_time / 2000;
-        background_time = background_time / 6000;
-        bullet_time = bullet_time / 2000;
-        meteor_time = meteor_time / 2000;
-        bonus_time = bonus_time / 2000;
+    while (MainWindow.isOpen()){
+        timer.background = clock.getElapsedTime().asMicroseconds();
+        timer.spaceship = clock.getElapsedTime().asMicroseconds();
+        timer.bullet = clock.getElapsedTime().asMicroseconds();
+        timer.meteor = clock.getElapsedTime().asMicroseconds();
+        timer.bonus = clock.getElapsedTime().asMicroseconds();
+        timer.background = timer.background / 6000;
+        timer.spaceship = timer.spaceship / 2000;
+        timer.bullet = timer.bullet / 2000;
+        timer.meteor = timer.meteor / 2000;
+        timer.bonus = timer.bonus / 2000;
         clock.restart();
 
         // создаем элементы интерфейса
         std::ostringstream ammo;
         ammo << "Ammo: " << ammoleft;
-        Text ammoInterface(font);
-        ammoInterface.setString(ammo.str());
-        ammoInterface.setPosition({500,24});
+        Text AmmoInterface(font);
+        AmmoInterface.setString(ammo.str());
+        AmmoInterface.setPosition({500,24});
 
         std::ostringstream enemy;
         enemy << "Enemy: " << enemyleft;
-        Text enemyInterface(font);
-        enemyInterface.setString(enemy.str());
-        enemyInterface.setPosition({20,24});
+        Text EnemyInterface(font);
+        EnemyInterface.setString(enemy.str());
+        EnemyInterface.setPosition({20,24});
 
-        while (const std::optional event = main_win.pollEvent()){
+        while (const std::optional event = MainWindow.pollEvent()){
             if (event->is<sf::Event::Closed>())
-                main_win.close();
+                MainWindow.close();
             if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()){ //блок обработки нажатия кнопок
                 if (!gameover){
                     if (keyPressed->scancode == sf::Keyboard::Scancode::A)
@@ -134,8 +139,8 @@ int main(){
                         spaceship_pos.y = 0.5;
                 }
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Space && count_bullets < bullets && !gameover && !winner && game){ // выстрел на пробел
-                    bullet[count_bullets]->restart_bullet(spaceship_shape);
-                    bullet[count_bullets]->ishoot = true;
+                    Bullets[count_bullets]->restart_bullet(Spaceship);
+                    Bullets[count_bullets]->ishoot = true;
                     ammoleft--;
                     count_bullets += 1;
                 }
@@ -153,116 +158,118 @@ int main(){
             }
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) game = true;
-        main_win.clear();
-        BackgroundMovement(background_shape, background_shape2, background_time); // имитация космического фона
-        main_win.draw(background_shape);
-        main_win.draw(background_shape2);
+        
+        MainWindow.clear();
+        BackgroundMovement(Background1, Background2, timer.background); 
+        MainWindow.draw(Background1);
+        MainWindow.draw(Background2);
+
         if (game){
-            if (bonus){
-                bonus->BonusMovement(bonus_time);
-                bonus->draw(main_win);
-            }
-            SpaceshipMovement(spaceship_shape, spaceship_pos, spaceship_time); // движение космического корабля
-            for (int i = 0; i < nmeteors; i++){ // движение метеоритов
-                if (meteors[i]) meteors[i]->MeteorMovement(meteor_time);
-            }
-            for (int m = 0; m < nmeteors; m++){
-                if (meteors[m]){
-                    meteors[m]->draw(main_win);
+            for (int i = 0; i < 2; i++){
+                if (Bonuses[i]){
+                    Bonuses[i]->BonusMovement(timer.bonus);
+                    Bonuses[i]->draw(MainWindow);
                 }
             }
+
+            SpaceshipMovement(Spaceship, spaceship_pos, timer.spaceship); // движение космического корабля
+
+            for (int i = 0; i < meteors; i++){ // движение метеоритов
+                if (Meteors[i]){
+                    Meteors[i]->MeteorMovement(timer.meteor);
+                    Meteors[i]->draw(MainWindow);
+                }
+            }
+            
             if (gameover){
                 spaceship_pos = {0,0};
-                explode_shape.setPosition(spaceship_crash_pos);
-                main_win.draw(explode_shape);
-                main_win.draw(lose);
-                main_win.draw(restartGame);
+                Explode.setPosition(spaceship_crash_pos);
+                MainWindow.draw(Explode);
+                MainWindow.draw(Lose);
+                MainWindow.draw(RestartGame);
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F)){
                     gameover = false;
-                    nmeteors = 10;
+                    meteors = 10;
                     enemyleft = 10;
-                    for (int m = 0; m < nmeteors; m++) meteors[m] = new Meteor();
                     bullets = 15;
                     ammoleft = 15;
-                    for (int b = 0; b < bullets; b++) bullet[b] = new Bullet();
                     count_bullets = 0;
                     countowin = 0;
-                    bonus = new Bonus();
+                    for (int m = 0; m < meteors; m++) Meteors[m] = new Meteor();
+                    for (int b = 0; b < bullets; b++) Bullets[b] = new Bullet();
+                    for (int b = 0; b < 2; b++) Bonuses[b] = new Bonus();
                 }
             } else if (countowin == 10){
                 for (int i = 0; i < bullets; i++){
-                    if (bullet[i]){
-                        delete bullet[i];
-                        bullet[i] = nullptr;
+                    if (Bullets[i]){
+                        delete Bullets[i];
+                        Bullets[i] = nullptr;
                     }
                 }
                 winner = true;
-                spaceship_shape.setPosition({-10,-10});
-                main_win.draw(win);
-                main_win.draw(restartGame);
+                Spaceship.setPosition({-10,-10});
+                MainWindow.draw(Win);
+                MainWindow.draw(RestartGame);
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F)){
                     winner = false;
-                    nmeteors = 10;
+                    meteors = 10;
                     enemyleft = 10;
-                    for (int m = 0; m < nmeteors; m++) meteors[m] = new Meteor();
                     bullets = 15;
                     ammoleft = 15;
-                    for (int b = 0; b < bullets; b++) bullet[b] = new Bullet();
                     count_bullets = 0;
                     countowin = 0;
-                    spaceship_shape.setPosition(Vector2f(360,600));
-                    bonus = new Bonus();
+                    for (int m = 0; m < meteors; m++) Meteors[m] = new Meteor();
+                    for (int b = 0; b < bullets; b++) Bullets[b] = new Bullet();
+                    for (int b = 0; b < 2; b++) Bonuses[b] = new Bonus();
+                    Spaceship.setPosition(Vector2f(360,600));
                 }
             } else {
-                main_win.draw(spaceship_shape);
-                main_win.draw(ammoInterface);
-                main_win.draw(enemyInterface);
-                for (int i = 0; i < nmeteors;i++){
-                    if (meteors[i]){
-                        if (meteors[i]->collision(spaceship_shape.getGlobalBounds())){
-                            gameover = true;
-                            spaceship_crash_pos = spaceship_shape.getPosition();
-                        }
+                MainWindow.draw(Spaceship);
+                MainWindow.draw(AmmoInterface);
+                MainWindow.draw(EnemyInterface);
+                for (int i = 0; i < meteors;i++){
+                    if (Meteors[i] && Meteors[i]->collision(Spaceship.getGlobalBounds())){
+                        gameover = true;
+                        spaceship_crash_pos = Spaceship.getPosition();
                     }
                 }
                 for (int i = 0; i < bullets; i++){
-                    if (bullet[i] && bullet[i]->ishoot){
-                        bullet[i]->bulletMovement(bullet_time);
-                        bullet[i]->draw(main_win);
-                        if (bullet[i]->getOfBounds()){
-                            delete bullet[i];
-                            bullet[i] = nullptr;
+                    if (Bullets[i] && Bullets[i]->ishoot){
+                        Bullets[i]->bulletMovement(timer.bullet);
+                        Bullets[i]->draw(MainWindow);
+                        
+                        if (Bullets[i]->getOfBounds()){
+                            delete Bullets[i];
+                            Bullets[i] = nullptr;
                         }
-                        for (int m = 0; m < nmeteors; m++){
-                            if (bullet[i]){
-                                if (meteors[m]){
-                                    if (meteors[m]->collision(bullet[i]->getBulletXY())){
+                        
+                        for (int m = 0; m < meteors; m++){
+                            if (Bullets[i]){
+                                if (Meteors[m]){
+                                    if (Meteors[m]->collision(Bullets[i]->getBulletXY())){
                                         countowin++;
                                         enemyleft--;
-                                        delete meteors[m];
-                                        meteors[m] = nullptr;
-                                        delete bullet[i];
-                                        bullet[i] = nullptr;
+                                        delete Meteors[m];
+                                        delete Bullets[i];
+                                        Meteors[m] = nullptr;
+                                        Bullets[i] = nullptr;
                                     }
                                 }
                             }
                         }
                     }
                 }
-                if(bonus){
-                    if (bonus->collision(spaceship_shape.getGlobalBounds())){
+                for (int i = 0; i < 2; i++){
+                    if(Bonuses[i] && Bonuses[i]->collision(Spaceship.getGlobalBounds())){
                         bullets += 15;
                         ammoleft += 15;
-                        delete bonus;
-                        bonus = {nullptr};
-                    }
-                }   
+                        delete Bonuses[i];
+                        Bonuses[i] = {nullptr};
+                    }   
+                }
             }
-        
-        } else {
-            main_win.draw(startGame);
-        }
-        main_win.display();
+        } else MainWindow.draw(StartGame);
+        MainWindow.display();
     }
 }
 

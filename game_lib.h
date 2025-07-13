@@ -7,4 +7,3 @@ void SpaceshipMovement(Sprite& spaceship_shape, Vector2f&  spaceship_pos, float 
 
 // анимация космического фона
 void BackgroundMovement(RectangleShape& background_shape, RectangleShape& background_shape2, float time);
-

@@ -6,7 +6,7 @@ class Bullet
 {
 private:
     Texture bullet;
-    RectangleShape bullet_shape;
+    Sprite bullet_shape;
 public:
     Bullet();
     ~Bullet();

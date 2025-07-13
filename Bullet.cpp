@@ -1,8 +1,10 @@
 #include "Bullet.h"
 
-Bullet::Bullet() : bullet_shape({2,5})
+Bullet::Bullet() : bullet(), bullet_shape(bullet)
 {
-    bullet_shape.setFillColor(Color::Red);
+    bullet.loadFromFile("images/beam.png");
+    bullet_shape.setTexture(bullet);
+    bullet_shape.setTextureRect(IntRect({0,0},{7,13}));
 }
 
 Bullet::~Bullet() 
@@ -12,7 +14,7 @@ Bullet::~Bullet()
 
 void Bullet::restart_bullet(Sprite &spaceship_shape)
 {
-    bullet_shape.setPosition({spaceship_shape.getPosition().x+40,spaceship_shape.getPosition().y+23});
+    bullet_shape.setPosition({spaceship_shape.getPosition().x+38,spaceship_shape.getPosition().y+23});
 }
 
 void Bullet::bulletMovement(float time)
